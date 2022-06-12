@@ -4,6 +4,8 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signInWithRedirect,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, getFirestore } from "firebase/firestore";
 // Your web app's Firebase configuration
@@ -36,8 +38,10 @@ export const signInWithGoogleRedirect = () =>
 export const db = getFirestore();
 
 //Creating a method to check user exists in firestore otherwise save the user
-
-export const createUserFromAuth = async (userAuth) => {
+export const createUserFromAuth = async (
+  userAuth,
+  additionalInformation = {}
+) => {
   //Establishing the doc reference
   const userDocRef = doc(db, "users", userAuth.uid);
   //Check user exsits
@@ -52,10 +56,20 @@ export const createUserFromAuth = async (userAuth) => {
         displayName,
         email,
         createdAt,
+        ...additionalInformation, //This will override the displayName property if it's null
       });
     } catch (error) {
       console.log("Error while creating user", error.message);
     }
   }
   return userDocRef;
+};
+
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+  if (!email || !password) return;
+  return await createUserWithEmailAndPassword(auth, email, password);
+};
+export const signInWithAuthUserEmailAndPassword = async (email, password) => {
+  if (!email || !password) return;
+  return await signInWithEmailAndPassword(auth, email, password);
 };
